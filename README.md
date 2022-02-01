@@ -1,4 +1,11 @@
 ## Проекты
+* [Project 2. Game: Battleship game](https://github.com/chingachguk1977/Battleship-game)
+
+Роман Быков (SF, FPW-58) The project is in development.
+
+The repository will contain the classic Battleship game for 2 players.
+
+
 * [Project 0. Game: Guess a Number](https://github.com/chingachguk1977/Guess_a_number)
 
 Роман Быков (SF, DST-100)
@@ -14,12 +21,6 @@ The computer generates a sequence of random numbers and tries to guess a number 
 
 The repository contains the classic Tic-Tac-Toe game for 2 players.
 
-
-* [Project 2. Game: Battleship game](https://github.com/chingachguk1977/Battleship-game)
-
-Роман Быков (SF, FPW-58) The project is in development.
-
-The repository will contain the classic Battleship game for 2 players.
 
 
 GLHF!
