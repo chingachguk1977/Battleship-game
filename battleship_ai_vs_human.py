@@ -26,7 +26,7 @@ class GameBoard:
         print("  +-+-+-+-+-+-+-+")
         row_num = 1
         for row in self.board:
-            print(f"{row_num}|{'|'.join(row)}")
+            print(f"{row_num}|{'|'.join(row)}|")
             row_num += 1
             
             
