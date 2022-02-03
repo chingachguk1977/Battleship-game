@@ -38,11 +38,10 @@ class Dot:
 
 class Ship:
 
-    def __init__(self, length, bow, orientation, hp) -> None:
+    def __init__(self, length, bow, orientation) -> None:
         self.length = length
         self.bow = bow
         self.orientation = orientation
-        self.hp = hp
 
     @property
     def ship_body(self) -> list:
@@ -54,9 +53,9 @@ class Ship:
             current_x = self.bow.x
             current_y = self.bow.y
 
-            if self.orientation == 'Horizontal':
+            if self.orientation == 'Vertical':
                 current_x += i
-            elif self.orientation == 'Vertical':
+            elif self.orientation == 'Horizontal':
                 current_y += i
 
             ship_cells.append(Dot(current_x, current_y))
@@ -71,26 +70,68 @@ class Ship:
 
 
 class Board:
+    MAX_COORD = 6
 
-    def __init__(self, hidden=False, size=6):
+    def __init__(self, hidden=False, size=MAX_COORD):
         self.size = size
         self.hidden = hidden
 
         self.count = 0  # The number of ships that were sunk
-        self.grid = [["≋"] * size for _ in range(size)]  # The actual board grid in the console
-        self.busy = []  # List of cells either occupied by a ship or already tried
+        self.grid = [["o"] * size for _ in range(size)]  # The actual board grid in the console
+        self.occupied = []  # List of cells either occupied by a ship or already shot at
         self.ships = []
 
     def __str__(self):
         res = ""
-        print("  1 2 3 4 5 6")
+        res += "  1 2 3 4 5 6\n"
         for i, row in enumerate(self.grid):
             res += f"{i + 1}|" + "|".join(row) + "|\n"
 
-        if self.hidden:
-            res = res.replace("■", "O")
+        if self.hidden:  # toggles visibility of the ships on the board to the other player
+            res = res.replace("█", "o")
         return res
+
+    def off_grid(self, dot) -> bool:
+        """
+        Verifies that the given dot is not outside the board.
+        """
+        return not ((0 <= dot.x < self.size) and (0 <= dot.y < self.size))
+
+    def contour(self, ship, verb=True):
+        """
+        Creates a single-cell stroke around each ship and toggles all the board cells
+        that belong to this stroke as 'occupied.'
+
+        "verb" arg is for 'verbose' i.e. tells us if occupied property should be showed in the console.
+        """
+        shifts = [
+            (-1, -1), (-1, 0), (-1, 1),
+            (0,  -1), (0,  0), (0,  1),
+            (1,  -1), (1,  0), (1,  1)
+        ]
+
+        for cell in ship.ship_body:
+            for dx, dy in shifts:
+                cur = Dot(cell.x + dx, cell.y + dy)
+                if not(self.off_grid(cur)) and cur not in self.occupied:
+                    if verb:
+                        self.grid[cur.x][cur.y] = "."
+                    self.occupied.append(cur)
+
+    def place_ship(self, ship):
+
+        for cell in ship.ship_body:
+            if self.off_grid(cell) or cell in self.occupied:
+                raise BoardWrongShipException()
+        for cell in ship.ship_body:
+            self.grid[cell.x][cell.y] = "■"
+            self.occupied.append(cell)
+
+        self.ships.append(ship)
+        self.contour(ship)
 
 
 b = Board()
+b.place_ship(Ship(3, Dot(0, 2), 'Vertical'))
+b.contour(Ship(3, Dot(0, 2), 'Vertical'))
 print(b)
