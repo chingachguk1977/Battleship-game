@@ -21,6 +21,9 @@ class Dot:
         
     def __eq__(self, other) -> bool:
         return self.x == other.x and self.y == other.y
+
+    def __repr__(self):
+        return f"Dot({self.x}, {self.y})"
     
     
 class Ship:
