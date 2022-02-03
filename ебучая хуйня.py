@@ -53,9 +53,9 @@ class Ship:
             current_x = self.bow.x
             current_y = self.bow.y
 
-            if self.orientation == 'Vertical':
+            if self.orientation == 'Vert':
                 current_x += i
-            elif self.orientation == 'Horizontal':
+            elif self.orientation == 'Hor':
                 current_y += i
 
             ship_cells.append(Dot(current_x, current_y))
@@ -97,7 +97,7 @@ class Board:
         """
         return not ((0 <= dot.x < self.size) and (0 <= dot.y < self.size))
 
-    def contour(self, ship, verb=True):
+    def stroke(self, ship, verb=False):
         """
         Creates a single-cell stroke around each ship and toggles all the board cells
         that belong to this stroke as 'occupied.'
@@ -128,10 +128,10 @@ class Board:
             self.occupied.append(cell)
 
         self.ships.append(ship)
-        self.contour(ship)
+        self.stroke(ship)
 
 
 b = Board()
-b.place_ship(Ship(3, Dot(0, 2), 'Vertical'))
-b.contour(Ship(3, Dot(0, 2), 'Vertical'))
+b.place_ship(Ship(3, Dot(0, 2), 'Vert'))
+b.stroke(Ship(3, Dot(0, 2), 'Vert'))
 print(b)
