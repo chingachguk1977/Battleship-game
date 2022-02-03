@@ -31,4 +31,11 @@ class Ship:
         self.orientation = orientation
         self.hp = hp
         
+    def dots(self):
+        """Returns the list with all dots occupied by a ship
+        """
+        pass
+    
+class Board:
+    
     
