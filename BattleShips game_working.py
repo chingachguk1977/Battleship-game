@@ -55,11 +55,10 @@ class Ship:
         for i in range(self.length):  # in a loop, builds a ship, marking the board dots as occupied
             current_x = self.bow.x
             current_y = self.bow.y
-            
-           # TODO: dict with vert & hor to be represented as 0 and 1
-            if self.orientation == 0: #  'Vert':
+
+            if self.orientation == 0:  # 'Hor':
                 current_x += i
-            elif self.orientation == 1: #  'Hor':
+            elif self.orientation == 1:  # 'Vert':
                 current_y += i
 
             ship_cells.append(Dot(current_x, current_y))
@@ -140,7 +139,7 @@ class Board:
 
         self.ships.append(ship)
         self.stroke(ship)
-        
+
     def shot(self, cell) -> bool:
         """
         Make a shot at a ship and returns yes/no to the 'Player.move" method.
@@ -213,7 +212,7 @@ class Player:
 class AI(Player):
 
     def ask(self) -> Dot:
-        cell = Dot(randint(0, Board.MAX_COORD-1), randint(0, Board.MAX_COORD-1))
+        cell = Dot(randint(0, Board.MAX_COORD - 1), randint(0, Board.MAX_COORD - 1))
         # print(f"AI's move: {cell.x + 1} {cell.y + 1}")
         return cell  # returns coords of the attempted shot
 
@@ -304,19 +303,19 @@ class Game:
     def game_loop(self):
         move_num = 0
         while True:
-            print("-" * (Board.MAX_COORD*3 + 3))
+            print("-" * (Board.MAX_COORD * 3 + 3))
             print("Human Player's board:")
             print(self.human.board)
-            print("-" * (Board.MAX_COORD*3 + 3))
+            print("-" * (Board.MAX_COORD * 3 + 3))
             print("AI Player's board:")
             print(self.ai.board)
 
             if move_num % 2 == 0:
-                print("-" * (Board.MAX_COORD*3 + 3))
+                print("-" * (Board.MAX_COORD * 3 + 3))
                 print("Your move, Human!")
                 repeat = self.human.move()
             else:
-                print("-" * (Board.MAX_COORD*3 + 3))
+                print("-" * (Board.MAX_COORD * 3 + 3))
                 print("AI's move.")
                 repeat = self.ai.move()
 
@@ -324,14 +323,14 @@ class Game:
                 move_num -= 1
 
             if self.ai.board.game_over:
-                print("-" * (Board.MAX_COORD*3 + 3))
+                print("-" * (Board.MAX_COORD * 3 + 3))
                 print()
                 print("AI's flotilla destroyed! You won, Human!")
                 print(self.ai.board)
                 break
 
             if self.human.board.game_over:
-                print("-" * (Board.MAX_COORD*3 + 3))
+                print("-" * (Board.MAX_COORD * 3 + 3))
                 print("AI has killed all humans!")
                 print(self.human.board)
                 break
