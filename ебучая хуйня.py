@@ -1,6 +1,19 @@
 from random import randint
 
 
+class Dot:
+
+    def __init__(self, x, y) -> None:
+        self.x = x
+        self.y = y
+
+    def __eq__(self, other) -> bool:
+        return self.x == other.x and self.y == other.y
+
+    def __repr__(self) -> str:
+        return f"Dot({self.x}, {self.y})"
+
+
 class BoardException(Exception):
     pass
 
@@ -26,23 +39,10 @@ class BoardWrongShipException(BoardException):
     pass
 
 
-class Dot:
-
-    def __init__(self, x, y) -> None:
-        self.x = x
-        self.y = y
-
-    def __eq__(self, other) -> bool:
-        return self.x == other.x and self.y == other.y
-
-    def __repr__(self) -> str:
-        return f"Dot({self.x}, {self.y})"
-
-
 class Ship:
 
     def __init__(self, length, bow, orientation) -> None:
-        self.length = length
+        self.length = self.hp = length
         self.bow = bow
         self.orientation = orientation
 
@@ -55,10 +55,11 @@ class Ship:
         for i in range(self.length):  # in a loop, builds a ship, marking the board dots as occupied
             current_x = self.bow.x
             current_y = self.bow.y
-
-            if self.orientation == 'Vert':
+            
+           # TODO: dict with vert & hor to be represented as 0 and 1
+            if self.orientation == 0: #  'Vert':
                 current_x += i
-            elif self.orientation == 'Hor':
+            elif self.orientation == 1: #  'Hor':
                 current_y += i
 
             ship_cells.append(Dot(current_x, current_y))
@@ -73,13 +74,13 @@ class Ship:
 
 
 class Board:
-    MAX_COORD = 6  # Size of the game board (no more than 11 to keep it nice and tidy).
+    MAX_COORD = 8  # Size of the game board (no more than 11 to keep it nice and tidy).
 
     def __init__(self, hidden=False, size=MAX_COORD):
         self.size = size
         self.hidden = hidden
 
-        self.count = 0  # The number of ships that were sunk
+        self.sunk_ships = 0  # The number of ships that were sunk
         self.grid = [["o"] * size for _ in range(size)]  # The actual board grid in the console
         self.occupied = []  # List of cells either occupied by a ship or already shot at
         self.ships = []
@@ -109,7 +110,7 @@ class Board:
         Creates a single-cell stroke around each ship and toggles all the board cells
         that belong to this stroke as 'occupied.'
 
-        "verb" arg is for 'verbose' i.e. tells us if occupied property should be showed in the console.
+        "verb" arg is for 'verbose' i.e. toggles the visibility of occupied property.
         """
         shifts = [
             (-1, -1), (-1, 0), (-1, 1),
@@ -126,7 +127,6 @@ class Board:
                     self.occupied.append(current)
 
     def place_ship(self, ship):
-
         for cell in ship.ship_body:
             if self.off_grid(cell) or cell in self.occupied:
                 raise BoardWrongShipException()
@@ -139,7 +139,7 @@ class Board:
 
     def shot(self, cell) -> bool:
         """
-        Make a shot at a ship.
+        Make a shot at a ship and returns yes/no to the 'Player.move" method.
         """
         if self.off_grid(cell):
             raise BoardOutException()
@@ -152,18 +152,17 @@ class Board:
         self.occupied.append(cell)  # add this cell to the occupied list
 
         for ship in self.ships:  # see if the cell belongs to a ship
-
-            if ship.hit(cell):
+            if cell in ship.ship_body:
                 ship.hp -= 1
                 self.grid[cell.x][cell.y] = "X"
 
                 if ship.hp == 0:
-                    self.count += 1
+                    self.sunk_ships += 1
 
                     # if sunk, stroke the ship so we don't shoot there again
                     self.stroke(ship, verb=True)
-                    print("The ship is sunk!")
-                    return False
+                    print("The ship is sunk!", self.sunk_ships, len(self.ships))
+                    return True # TODO why true/false?
                 else:
                     print("Hit!")
                     return True
@@ -180,11 +179,12 @@ class Board:
         """
         self.occupied = []
 
+    @property
     def game_over(self) -> bool:
         """
         Defeat if all ships got sunk.
         """
-        return self.count == len(self.ships)
+        return self.sunk_ships == len(self.ships)
 
 
 class Player:
@@ -199,9 +199,9 @@ class Player:
     def move(self):
         while True:
             try:
-                target = self.ask()
-                repeat = self.opponent.shot(target)
-                return repeat
+                target = self.ask()  # asks Player for input of coords to shoot
+                repeat = self.opponent.shot(target)  # receives hit/miss from Board.shot
+                return repeat  # if hit/sunk, grants another move
             except BoardException as e:
                 print(e)
 
@@ -209,9 +209,9 @@ class Player:
 class AI(Player):
 
     def ask(self) -> Dot:
-        cell = Dot(randint(0, Board.MAX_COORD), randint(0, Board.MAX_COORD))
+        cell = Dot(randint(0, Board.MAX_COORD-1), randint(0, Board.MAX_COORD-1))
         print(f"AI's move: {cell.x + 1} {cell.y + 1}")
-        return cell
+        return cell  # returns coords of the attempted shot
 
 
 class Human(Player):
@@ -229,23 +229,22 @@ class Human(Player):
 
             x, y = move
 
-            if not (x.isdigit()) or not (y.isdigit()):
+            if (not x.isdigit()) or (not y.isdigit()):
                 print(" Coordinates must be numbers! ")
                 continue
 
             x, y = int(x), int(y)
 
-            return Dot(x, y)
-            # return Dot(x - 1, y - 1)
+            return Dot(x, y)  # returns coords of the attempted shot
 
 
 class Game:
 
-    def __init__(self, size=Board.MAX_COORD):
-        self.size = size
+    def __init__(self):
+        self.size = Board.MAX_COORD
         human = self.forced_gen_ships()
         computer = self.forced_gen_ships()
-        computer.hidden = True
+        computer.hidden = False  # Whether we want to hide AI's board to the Human
 
         self.ai = AI(computer, human)
         self.human = Human(human, computer)
@@ -261,9 +260,12 @@ class Game:
 
     def gen_ships(self) -> Board:
         lengths = [3, 2, 2, 1, 1, 1, 1]
-        board = Board(size=self.size)
+        board = Board()
         attempts = 0
         for counter in lengths:
+            """
+            counter defines the length and hp of each ship as given in the lengths list above.
+            """
             while True:
                 attempts += 1
                 if attempts > 2000:
@@ -271,10 +273,15 @@ class Game:
                 ship = Ship(counter, Dot(randint(0, self.size), randint(0, self.size)), randint(0, 1))
                 try:
                     board.place_ship(ship)
-                    # if ships placement succeeded, leave the while loop
+                    """
+                    if the ship's placement succeeded, leave the while loop
+                    and switch to the next ship.
+                    """
                     break
                 except BoardWrongShipException:
-                    # in case of failure, keep trying
+                    """
+                    in case of failure, keep trying (resume the while loop)
+                    """
                     pass
         board.begin()
         return board
@@ -293,19 +300,19 @@ class Game:
     def game_loop(self):
         move_num = 0
         while True:
-            print("-" * 20)
+            print("-" * (Board.MAX_COORD*3 + 3))
             print("Human Player's board:")
             print(self.human.board)
-            print("-" * 20)
+            print("-" * (Board.MAX_COORD*3 + 3))
             print("AI Player's board:")
             print(self.ai.board)
 
             if move_num % 2 == 0:
-                print("-" * 20)
+                print("-" * (Board.MAX_COORD*3 + 3))
                 print("Your move, Human!")
                 repeat = self.human.move()
             else:
-                print("-" * 20)
+                print("-" * (Board.MAX_COORD*3 + 3))
                 print("AI's move.")
                 repeat = self.ai.move()
 
@@ -313,12 +320,13 @@ class Game:
                 move_num -= 1
 
             if self.ai.board.game_over:
-                print("-" * 20)
+                print("-" * (Board.MAX_COORD*3 + 3))
+                print()
                 print("Human Player won!")
                 break
 
             if self.human.board.game_over:
-                print("-" * 20)
+                print("-" * (Board.MAX_COORD*3 + 3))
                 print("AI Player won!")
                 break
             move_num += 1
