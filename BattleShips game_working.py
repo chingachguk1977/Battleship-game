@@ -74,7 +74,10 @@ class Ship:
 
 
 class Board:
-    MAX_COORD = 8  # Size of the game board (no more than 11 to keep it nice and tidy).
+    MAX_COORD = 9  # Size of the game board (no more than 11 to keep it nice and tidy).
+    BLUE = "\033[34m"
+    RED = "\033[31m"
+    ORIGIN_COLOR = "\033[0m"
 
     def __init__(self, hidden=False, size=MAX_COORD):
         self.size = size
@@ -97,8 +100,7 @@ class Board:
 
         if self.hidden:  # toggles visibility of the ships on the board to the other player
             for _ in range(len(self.ships)):
-                res = res.replace(str(_), "o")
-                res = res.replace("■", "o")
+                res = res.replace("■", Board.ORIGIN_COLOR + "o")
         return res
 
     def off_grid(self, cell) -> bool:
@@ -125,15 +127,15 @@ class Board:
                 current = Dot(cell.x + dx, cell.y + dy)
                 if not (self.off_grid(current)) and current not in self.occupied:
                     if verb:
-                        self.grid[current.x][current.y] = "."
+                        self.grid[current.x][current.y] = Board.ORIGIN_COLOR + "."
                     self.occupied.append(current)
 
     def place_ship(self, ship):
         for cell in ship.ship_body:
             if self.off_grid(cell) or cell in self.occupied:
                 raise BoardWrongShipException()
-        for cell_num, cell in enumerate(ship.ship_body):
-            self.grid[cell.x][cell.y] = "■"#str(cell_num)
+        for cell in ship.ship_body:
+            self.grid[cell.x][cell.y] = Board.BLUE + "■" + Board.ORIGIN_COLOR
             self.occupied.append(cell)
 
         self.ships.append(ship)
@@ -156,7 +158,7 @@ class Board:
         for ship in self.ships:  # see if the cell belongs to a ship
             if cell in ship.ship_body:
                 ship.hp -= 1
-                self.grid[cell.x][cell.y] = "X"
+                self.grid[cell.x][cell.y] = Board.RED + "X" + Board.ORIGIN_COLOR
 
                 if ship.hp == 0:
                     self.sunk_ships += 1
@@ -212,7 +214,7 @@ class AI(Player):
 
     def ask(self) -> Dot:
         cell = Dot(randint(0, Board.MAX_COORD-1), randint(0, Board.MAX_COORD-1))
-        print(f"AI's move: {cell.x + 1} {cell.y + 1}")
+        # print(f"AI's move: {cell.x + 1} {cell.y + 1}")
         return cell  # returns coords of the attempted shot
 
 
@@ -246,7 +248,7 @@ class Game:
         self.size = Board.MAX_COORD
         human = self.forced_gen_ships()
         computer = self.forced_gen_ships()
-        computer.hidden = False  # Whether we want to hide AI's board to the Human
+        computer.hidden = True  # Whether we want to hide AI's board to the Human
 
         self.ai = AI(computer, human)
         self.human = Human(human, computer)
@@ -324,12 +326,14 @@ class Game:
             if self.ai.board.game_over:
                 print("-" * (Board.MAX_COORD*3 + 3))
                 print()
-                print("Human Player won!")
+                print("AI's flotilla destroyed! You won, Human!")
+                print(self.ai.board)
                 break
 
             if self.human.board.game_over:
                 print("-" * (Board.MAX_COORD*3 + 3))
-                print("AI Player won!")
+                print("AI has killed all humans!")
+                print(self.human.board)
                 break
             move_num += 1
 
