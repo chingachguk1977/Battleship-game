@@ -73,7 +73,7 @@ class Ship:
 
 
 class Board:
-    MAX_COORD = 9  # Size of the game board (no more than 11 to keep it nice and tidy).
+    MAX_COORD = 10  # Size of the game board (no more than 11 to keep it nice and tidy).
     BLUE = "\033[34m"
     RED = "\033[31m"
     ORIGIN_COLOR = "\033[0m"
