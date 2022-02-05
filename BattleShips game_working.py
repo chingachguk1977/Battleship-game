@@ -96,7 +96,9 @@ class Board:
             res += f"{i}|" + "|".join(row) + "|\n"
 
         if self.hidden:  # toggles visibility of the ships on the board to the other player
-            res = res.replace("■", "o")
+            for _ in range(len(self.ships)):
+                res = res.replace(str(_), "o")
+                res = res.replace("■", "o")
         return res
 
     def off_grid(self, cell) -> bool:
@@ -130,13 +132,13 @@ class Board:
         for cell in ship.ship_body:
             if self.off_grid(cell) or cell in self.occupied:
                 raise BoardWrongShipException()
-        for cell in ship.ship_body:
-            self.grid[cell.x][cell.y] = "■"
+        for cell_num, cell in enumerate(ship.ship_body):
+            self.grid[cell.x][cell.y] = "■"#str(cell_num)
             self.occupied.append(cell)
 
         self.ships.append(ship)
         self.stroke(ship)
-
+        
     def shot(self, cell) -> bool:
         """
         Make a shot at a ship and returns yes/no to the 'Player.move" method.
@@ -161,8 +163,8 @@ class Board:
 
                     # if sunk, stroke the ship so we don't shoot there again
                     self.stroke(ship, verb=True)
-                    print("The ship is sunk!", self.sunk_ships, len(self.ships))
-                    return True # TODO why true/false?
+                    print("The ship is sunk!")
+                    return True
                 else:
                     print("Hit!")
                     return True
