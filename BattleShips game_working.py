@@ -225,7 +225,7 @@ class Human(Player):
         The human player makes their move.
         """
         while True:
-            move = input("Your move: ").split()
+            move = input("Coordinates to shoot? ").split()
 
             if len(move) != 2:
                 print(" Enter both coordinates! ")
