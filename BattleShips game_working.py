@@ -262,7 +262,14 @@ class Game:
         return board
 
     def gen_ships(self) -> Board:
-        lengths = [3, 2, 2, 1, 1, 1, 1]
+        """
+        The number and length of ships is determined by the board dimensions
+        and are randomized: fewer ships that are bigger & more smaller ships.
+        """
+        lengths = list([4]*randint(0, Board.MAX_COORD // 4) \
+                    + [3]*randint(1, Board.MAX_COORD // 3) \
+                        + [2]*randint(2, Board.MAX_COORD // 2) \
+                            + [1]*randint(3, Board.MAX_COORD // 2 + 1))
         board = Board()
         attempts = 0
         for counter in lengths:
@@ -271,7 +278,7 @@ class Game:
             """
             while True:
                 attempts += 1
-                if attempts > 2000:
+                if attempts > 1000:
                     return None
                 ship = Ship(counter, Dot(randint(0, self.size), randint(0, self.size)), randint(0, 1))
                 try:
