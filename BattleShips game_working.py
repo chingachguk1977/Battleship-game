@@ -310,19 +310,19 @@ class Game:
     def game_loop(self):
         move_num = 0
         while True:
-            print("-" * (Board.MAX_COORD * 3 + 3))
+            print("-" * (Board.MAX_COORD * 3))
             print("Human Player's board:")
             print(self.human.board)
-            print("-" * (Board.MAX_COORD * 3 + 3))
+            print("-" * (Board.MAX_COORD * 3))
             print("AI Player's board:")
             print(self.ai.board)
 
             if move_num % 2 == 0:
-                print("-" * (Board.MAX_COORD * 3 + 3))
+                print("-" * (Board.MAX_COORD * 3))
                 print("Your move, Human!")
                 repeat = self.human.move()
             else:
-                print("-" * (Board.MAX_COORD * 3 + 3))
+                print("-" * (Board.MAX_COORD * 3))
                 print("AI's move.")
                 repeat = self.ai.move()
 
@@ -330,14 +330,14 @@ class Game:
                 move_num -= 1
 
             if self.ai.board.game_over:
-                print("-" * (Board.MAX_COORD * 3 + 3))
+                print("-" * (Board.MAX_COORD * 3))
                 print()
                 print("AI's flotilla destroyed! You won, Human!")
                 print(self.ai.board)
                 break
 
             if self.human.board.game_over:
-                print("-" * (Board.MAX_COORD * 3 + 3))
+                print("-" * (Board.MAX_COORD * 3))
                 print("AI has killed all humans!")
                 print(self.human.board)
                 break
