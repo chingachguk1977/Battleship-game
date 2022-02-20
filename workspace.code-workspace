@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "..\\..\\Data Science - DST-100\\Python 10 Введение в Pandas"
+		},
+		{
+			"path": "..\\CurrencyConverterBot"
 		}
 	],
 	"settings": {}
